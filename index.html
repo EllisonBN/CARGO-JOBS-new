@@ -478,6 +478,7 @@ footer strong{color:#fff;}
       <form id="appForm" action="https://formsubmit.co/ellison@cargo.co.il" method="POST" enctype="multipart/form-data">
         <!-- FormSubmit settings -->
         <input type="hidden" name="_subject" value="🚀 מועמד/ת חדש/ה ב-CARGO"/>
+        <input type="hidden" name="_cc" value="shanip@cargo.co.il"/>
         <input type="hidden" name="_captcha" value="false"/>
         <input type="hidden" name="_template" value="table"/>
         <input type="hidden" name="_next" value="https://jobs.cargo.co.il/?sent=1"/>
@@ -507,12 +508,15 @@ footer strong{color:#fff;}
 <footer><strong>CARGO</strong> © 2025 כל הזכויות שמורות</footer>
 
 <script>
+// Apps Script endpoint for Sheet + Drive (fires alongside the email)
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3zwwzQRjCcITByGKNs1YfXczjlyn-VXJ0nfe9D9ebTFsJvN7jnWUf5ogUgVoq-RvW/exec';
+
 // File name display
 document.getElementById('fFile').addEventListener('change',function(){
   document.getElementById('fFileName').textContent=this.files[0]?this.files[0].name:'';
 });
 
-// Validate before native submit to FormSubmit.co
+// Validate, then send to Apps Script (Sheet+Drive) AND submit to FormSubmit (email)
 document.getElementById('appForm').addEventListener('submit',function(e){
   const st=document.getElementById('fStatus');
   st.textContent='';st.className='form-status';
@@ -521,7 +525,31 @@ document.getElementById('appForm').addEventListener('submit',function(e){
   if(!ok){e.preventDefault();st.textContent='נא למלא את כל השדות החובה';st.className='form-status err';return;}
   const file=document.getElementById('fFile').files[0];
   if(file&&file.size>5*1024*1024){e.preventDefault();st.textContent='הקובץ גדול מדי – עד 5MB';st.className='form-status err';return;}
-  // valid → let the form submit natively (redirects to thank-you)
+
+  // Fire-and-forget to Apps Script for Sheet + Drive (does not block the email submit)
+  try{
+    const send = async () => {
+      const payload = {
+        fullName:  document.getElementById('fName').value.trim(),
+        phone:     document.getElementById('fPhone').value.trim(),
+        email:     document.getElementById('fEmail').value.trim(),
+        role:      document.getElementById('fRole').value.trim(),
+        timestamp: new Date().toLocaleString('he-IL')
+      };
+      if(file){
+        payload.resumeBase64   = await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
+        payload.resumeFilename = file.name;
+        payload.resumeMimeType = file.type;
+      }
+      const body = new URLSearchParams(payload);
+      navigator.sendBeacon
+        ? navigator.sendBeacon(APPS_SCRIPT_URL, body)
+        : fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',body});
+    };
+    send();
+  }catch(err){ console.error('Sheet send failed (non-blocking):', err); }
+
+  // valid → let the form submit natively to FormSubmit (email + redirect)
   document.getElementById('fBtn').disabled=true;
   document.getElementById('loader').classList.add('on');
 });
