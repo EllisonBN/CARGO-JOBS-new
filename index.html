@@ -475,20 +475,25 @@ footer strong{color:#fff;}
     <div class="form-side">
       <p class="form-title">רוצה להצטרף למשפחת CARGO?</p>
       <p class="form-sub">השאר/י פרטים ונחזור אליך בהקדם.</p>
-      <form id="appForm" novalidate>
+      <form id="appForm" action="https://formsubmit.co/ellison@cargo.co.il" method="POST" enctype="multipart/form-data">
+        <!-- FormSubmit settings -->
+        <input type="hidden" name="_subject" value="🚀 מועמד/ת חדש/ה ב-CARGO"/>
+        <input type="hidden" name="_captcha" value="false"/>
+        <input type="hidden" name="_template" value="table"/>
+        <input type="hidden" name="_next" value="https://jobs.cargo.co.il/?sent=1"/>
         <div class="d-form-row">
-          <div class="field"><input type="text"  id="fName"  name="fullName" placeholder="שם מלא"  required/></div>
-          <div class="field"><input type="tel"   id="fPhone" name="phone"    placeholder="טלפון"   required/></div>
+          <div class="field"><input type="text"  id="fName"  name="שם מלא" placeholder="שם מלא"  required/></div>
+          <div class="field"><input type="tel"   id="fPhone" name="טלפון"   placeholder="טלפון"   required/></div>
         </div>
         <div class="d-form-row">
-          <div class="field"><input type="email" id="fEmail" name="email"    placeholder="אימייל"  required/></div>
-          <div class="field"><input type="text"  id="fRole"  name="role"     placeholder="משרה"/></div>
+          <div class="field"><input type="email" id="fEmail" name="אימייל"  placeholder="אימייל"  required/></div>
+          <div class="field"><input type="text"  id="fRole"  name="משרה"    placeholder="משרה"/></div>
         </div>
         <div class="upload-row">
           <label class="upload-label">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
             צירוף קורות חיים
-            <input type="file" id="fFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"/>
+            <input type="file" id="fFile" name="קורות חיים" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"/>
           </label>
           <div class="upload-name" id="fFileName"></div>
         </div>
@@ -502,55 +507,33 @@ footer strong{color:#fff;}
 <footer><strong>CARGO</strong> © 2025 כל הזכויות שמורות</footer>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/cargo.co.il/s/AKfycby3zwwzQRjCcITByGKNs1YfXczjlyn-VXJ0nfe9D9ebTFsJvN7jnWUf5ogUgVoq-RvW/exec';
+// File name display
 document.getElementById('fFile').addEventListener('change',function(){
   document.getElementById('fFileName').textContent=this.files[0]?this.files[0].name:'';
 });
-document.getElementById('appForm').addEventListener('submit',async function(e){
-  e.preventDefault();
+
+// Validate before native submit to FormSubmit.co
+document.getElementById('appForm').addEventListener('submit',function(e){
   const st=document.getElementById('fStatus');
   st.textContent='';st.className='form-status';
   let ok=true;
   this.querySelectorAll('[required]').forEach(f=>{if(!f.value.trim()){f.style.borderColor='#ffda8a';ok=false;}else f.style.borderColor='#fff';});
-  if(!ok){st.textContent='נא למלא את כל השדות החובה';st.className='form-status err';return;}
+  if(!ok){e.preventDefault();st.textContent='נא למלא את כל השדות החובה';st.className='form-status err';return;}
   const file=document.getElementById('fFile').files[0];
-  if(file&&file.size>5*1024*1024){st.textContent='הקובץ גדול מדי – עד 5MB';st.className='form-status err';return;}
+  if(file&&file.size>5*1024*1024){e.preventDefault();st.textContent='הקובץ גדול מדי – עד 5MB';st.className='form-status err';return;}
+  // valid → let the form submit natively (redirects to thank-you)
   document.getElementById('fBtn').disabled=true;
   document.getElementById('loader').classList.add('on');
-  try{
-    // Build payload object
-    const payload = {
-      fullName:  document.getElementById('fName').value.trim(),
-      phone:     document.getElementById('fPhone').value.trim(),
-      email:     document.getElementById('fEmail').value.trim(),
-      role:      document.getElementById('fRole').value.trim(),
-      timestamp: new Date().toLocaleString('he-IL')
-    };
-    // Encode file as base64 if provided
-    if(file){
-      const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
-      payload.resumeBase64   = b64;
-      payload.resumeFilename = file.name;
-      payload.resumeMimeType = file.type;
-    }
-    // Send as JSON — Apps Script handles this via e.postData.contents
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',   // avoids CORS preflight
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(payload)
-    });
-    // no-cors means we can't read the response — assume success
-    st.textContent='✅ המועמדות נשלחה בהצלחה! ניצור קשר בקרוב.';
-    this.reset();
-    document.getElementById('fFileName').textContent='';
-  }catch(err){
-    st.textContent='❌ שגיאה בשליחה – אנא נסה/י שוב.';st.className='form-status err';
-    console.error(err);
-  }finally{
-    document.getElementById('fBtn').disabled=false;document.getElementById('loader').classList.remove('on');
-  }
 });
+
+// Show success message if redirected back after sending
+if(new URLSearchParams(window.location.search).get('sent')==='1'){
+  window.addEventListener('DOMContentLoaded',function(){
+    const st=document.getElementById('fStatus');
+    if(st){st.textContent='✅ המועמדות נשלחה בהצלחה! ניצור קשר בקרוב.';st.className='form-status';}
+    document.getElementById('joinForm').scrollIntoView({behavior:'smooth'});
+  });
+}
 </script>
 </body>
 </html>
