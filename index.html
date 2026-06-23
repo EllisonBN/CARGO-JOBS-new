@@ -509,7 +509,7 @@ footer strong{color:#fff;}
 
 <script>
 // Apps Script endpoint for Sheet + Drive (fires alongside the email)
-const APPS_SCRIPT_URL = 'const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3zwwzQRjCcITByGKNs1YfXczjlyn-VXJ0nfe9D9ebTFsJvN7jnWUf5ogUgVoq-RvW/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3zwwzQRjCcITByGKNs1YfXczjlyn-VXJ0nfe9D9ebTFsJvN7jnWUf5ogUgVoq-RvW/exec';
 
 // File name display
 document.getElementById('fFile').addEventListener('change',function(){
@@ -526,9 +526,15 @@ document.getElementById('appForm').addEventListener('submit',function(e){
   const file=document.getElementById('fFile').files[0];
   if(file&&file.size>5*1024*1024){e.preventDefault();st.textContent='הקובץ גדול מדי – עד 5MB';st.className='form-status err';return;}
 
-  // Fire-and-forget to Apps Script for Sheet + Drive (does not block the email submit)
-  try{
-    const send = async () => {
+  // Prevent immediate navigation — we send to Apps Script first, then submit the email form
+  e.preventDefault();
+  document.getElementById('fBtn').disabled=true;
+  document.getElementById('loader').classList.add('on');
+
+  const theForm = this;
+  (async () => {
+    // 1) Send to Apps Script for Sheet + Drive (await so it completes before navigation)
+    try{
       const payload = {
         fullName:  document.getElementById('fName').value.trim(),
         phone:     document.getElementById('fPhone').value.trim(),
@@ -541,17 +547,16 @@ document.getElementById('appForm').addEventListener('submit',function(e){
         payload.resumeFilename = file.name;
         payload.resumeMimeType = file.type;
       }
-      const body = new URLSearchParams(payload);
-      navigator.sendBeacon
-        ? navigator.sendBeacon(APPS_SCRIPT_URL, body)
-        : fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',body});
-    };
-    send();
-  }catch(err){ console.error('Sheet send failed (non-blocking):', err); }
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: new URLSearchParams(payload)
+      });
+    }catch(err){ console.error('Sheet send failed (non-blocking):', err); }
 
-  // valid → let the form submit natively to FormSubmit (email + redirect)
-  document.getElementById('fBtn').disabled=true;
-  document.getElementById('loader').classList.add('on');
+    // 2) Now submit the form natively to FormSubmit (email + redirect)
+    theForm.submit();
+  })();
 });
 
 // Show success message if redirected back after sending
