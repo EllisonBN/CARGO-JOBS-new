@@ -296,6 +296,15 @@ footer strong{color:#fff;}
   .upload-row{text-align:center;}
   .form-status{text-align:center;}
 }
+
+.form-consent{font-size:12px;color:rgba(255,255,255,.85);margin-top:12px;line-height:1.5;}
+.form-consent a{color:#fff;text-decoration:underline;}
+.form-consent a:hover{opacity:.85;}
+footer .footer-links{margin-bottom:10px;display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;}
+footer .footer-links a{color:rgba(255,255,255,.85);text-decoration:none;font-size:14px;}
+footer .footer-links a:hover{color:#fff;text-decoration:underline;}
+footer .footer-links .sep{color:rgba(255,255,255,.4);}
+footer .footer-copy{font-size:13px;}
 </style>
 </head>
 <body>
@@ -494,17 +503,27 @@ footer strong{color:#fff;}
           <div class="upload-name" id="fFileName"></div>
         </div>
         <button type="submit" class="btn-submit" id="fBtn">אני רוצה להצטרף ל־CARGO</button>
+        <p class="form-consent">בשליחת הטופס אני מאשר/ת את <a href="https://cargo.co.il/privacy-policy-2/" target="_blank" rel="noopener">מדיניות הפרטיות</a> ואת <a href="https://cargo.co.il/%d7%aa%d7%a7%d7%a0%d7%95%d7%9f/" target="_blank" rel="noopener">תנאי השימוש</a>.</p>
         <div class="form-status" id="fStatus"></div>
       </form>
     </div>
   </div>
 </section>
 
-<footer><strong>CARGO</strong> © 2025 כל הזכויות שמורות</footer>
+<footer>
+  <div class="footer-links">
+    <a href="https://cargo.co.il/privacy-policy-2/" target="_blank" rel="noopener">מדיניות פרטיות</a>
+    <span class="sep">·</span>
+    <a href="https://cargo.co.il/%d7%aa%d7%a7%d7%a0%d7%95%d7%9f/" target="_blank" rel="noopener">תקנון</a>
+    <span class="sep">·</span>
+    <a href="https://cargo.co.il/%d7%94%d7%a6%d7%94%d7%a8%d7%aa-%d7%a0%d7%92%d7%99%d7%a9%d7%95%d7%aa/" target="_blank" rel="noopener">הצהרת נגישות</a>
+  </div>
+  <div class="footer-copy"><strong>CARGO</strong> © 2025 כל הזכויות שמורות</div>
+</footer>
 
 <script>
 // Apps Script endpoint for Sheet + Drive (fires alongside the email)
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzACLsfwJYlpIfr1H0mPNmYAmVkHUfz9nKf0cSStX0cqnpF5VxQKIO7a8wpjFfz3Msl/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3zwwzQRjCcITByGKNs1YfXczjlyn-VXJ0nfe9D9ebTFsJvN7jnWUf5ogUgVoq-RvW/exec';
 
 // File name display
 document.getElementById('fFile').addEventListener('change',function(){
