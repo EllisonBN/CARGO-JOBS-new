@@ -483,6 +483,7 @@ footer strong{color:#fff;}
         </div>
         <div class="d-form-row">
           <div class="field"><input type="text"  id="fLocation" name="אזור מגורים" placeholder="אזור מגורים"/></div>
+          <div class="field"><input type="text"  id="fReleaseDate" name="תאריך שחרור" placeholder="תאריך שחרור"/></div>
         </div>
         <div class="upload-row">
           <label class="upload-label">
@@ -503,7 +504,7 @@ footer strong{color:#fff;}
 
 <script>
 // Apps Script endpoint for Sheet + Drive (fires alongside the email)
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwAZng4Upt2nyzqBUoKr11xPpw3zzTPVl22LeLjiAObOF5W9ZBK4HvVu8raCOpF_J1/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzACLsfwJYlpIfr1H0mPNmYAmVkHUfz9nKf0cSStX0cqnpF5VxQKIO7a8wpjFfz3Msl/exec';
 
 // File name display
 document.getElementById('fFile').addEventListener('change',function(){
@@ -535,6 +536,7 @@ document.getElementById('appForm').addEventListener('submit',function(e){
         email:     document.getElementById('fEmail').value.trim(),
         role:      document.getElementById('fRole').value.trim(),
         location:  document.getElementById('fLocation').value.trim(),
+        releaseDate: document.getElementById('fReleaseDate').value.trim(),
         timestamp: new Date().toLocaleString('he-IL')
       };
       if(file){
