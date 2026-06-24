@@ -481,6 +481,9 @@ footer strong{color:#fff;}
           <div class="field"><input type="email" id="fEmail" name="אימייל"  placeholder="אימייל"  required/></div>
           <div class="field"><input type="text"  id="fRole"  name="משרה"    placeholder="משרה"/></div>
         </div>
+        <div class="d-form-row">
+          <div class="field"><input type="text"  id="fLocation" name="אזור מגורים" placeholder="אזור מגורים"/></div>
+        </div>
         <div class="upload-row">
           <label class="upload-label">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
@@ -531,6 +534,7 @@ document.getElementById('appForm').addEventListener('submit',function(e){
         phone:     document.getElementById('fPhone').value.trim(),
         email:     document.getElementById('fEmail').value.trim(),
         role:      document.getElementById('fRole').value.trim(),
+        location:  document.getElementById('fLocation').value.trim(),
         timestamp: new Date().toLocaleString('he-IL')
       };
       if(file){
